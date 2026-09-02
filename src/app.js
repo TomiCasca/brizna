@@ -21,7 +21,11 @@ export function navigate(path) {
 
 function parseHash() {
   const hash = window.location.hash.replace(/^#\/?/, '');
-  const [route, ...params] = hash.split('/').filter(Boolean);
+  const [route, ...rawParams] = hash.split('/').filter(Boolean);
+  // Los ids de artículo son URLs completas y viajan encodeURIComponent'eados
+  // en el hash (ver navigate(`/article/${encodeURIComponent(id)}`) en las
+  // vistas), así que hay que decodificarlos de vuelta acá.
+  const params = rawParams.map((p) => decodeURIComponent(p));
   return { route: route || 'home', params };
 }
 

@@ -4,8 +4,11 @@ import { formatRelativeDate } from '../utils/dateUtils.js';
 
 export function ArticleCard(article, { saved = false } = {}) {
   return `
-    <div class="article-card" role="button" data-open-article="${article.id}">
-      <div class="article-thumb">${icons.image}</div>
+    <div class="article-card" role="button" data-open-article="${escapeHtml(article.id)}">
+      <div class="article-thumb">
+        ${icons.image}
+        ${article.imageUrl ? `<img src="${escapeHtml(article.imageUrl)}" alt="" loading="lazy" onerror="this.remove()" />` : ''}
+      </div>
       <div class="article-body">
         <div class="article-title clamp-2">${escapeHtml(article.title)}</div>
         <div class="article-summary clamp-2">${escapeHtml(article.summary)}</div>
@@ -13,7 +16,7 @@ export function ArticleCard(article, { saved = false } = {}) {
           <span class="article-meta-text">${escapeHtml(article.sourceName)} · ${formatRelativeDate(article.publishedAt)}</span>
           <button
             class="save-toggle ${saved ? 'saved' : ''}"
-            data-toggle-save="${article.id}"
+            data-toggle-save="${escapeHtml(article.id)}"
             aria-label="${saved ? 'Quitar de guardadas' : 'Guardar'}"
           >${saved ? icons.bookmarkFilled : icons.bookmark}</button>
         </div>

@@ -31,14 +31,23 @@ export async function renderArticleDetail(root, { navigate, params }) {
         </button>
       </div>
 
-      <div style="margin:8px 20px 0;height:190px;border-radius:16px;background:var(--thumb);display:flex;align-items:center;justify-content:center;color:var(--thumb-ink);">
+      <div class="article-hero" style="position:relative;overflow:hidden;margin:8px 20px 0;height:190px;border-radius:16px;background:var(--thumb);display:flex;align-items:center;justify-content:center;color:var(--thumb-ink);">
         ${icons.image}
+        ${
+          article.imageUrl
+            ? `<img src="${escapeHtml(article.imageUrl)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()" />`
+            : ''
+        }
       </div>
 
       <div style="padding:20px 20px 40px;display:flex;flex-direction:column;gap:14px;">
-        <div style="display:inline-flex;align-self:flex-start;padding:5px 12px;border-radius:999px;background:var(--accent-tint);color:var(--accent);font-size:11.5px;font-weight:600;">
-          ${escapeHtml(getCategoryLabel(article.category))}
-        </div>
+        ${
+          getCategoryLabel(article.category)
+            ? `<div style="display:inline-flex;align-self:flex-start;padding:5px 12px;border-radius:999px;background:var(--accent-tint);color:var(--accent);font-size:11.5px;font-weight:600;">
+                ${escapeHtml(getCategoryLabel(article.category))}
+              </div>`
+            : ''
+        }
         <div style="font-size:21px;font-weight:700;line-height:1.3;letter-spacing:-0.01em;">${escapeHtml(article.title)}</div>
         <div style="font-size:12.5px;color:var(--sub);">${escapeHtml(article.sourceName)} · ${formatRelativeDate(article.publishedAt)}</div>
         <div style="font-size:14.5px;line-height:1.65;color:var(--text-body);">${escapeHtml(article.summary)}</div>

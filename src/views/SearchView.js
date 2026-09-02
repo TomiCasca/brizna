@@ -93,7 +93,7 @@ export async function renderSearch(root, { navigate }) {
 
   on(root, '[data-open-article]', 'click', (event, cardEl) => {
     if (event.target.closest('[data-toggle-save]')) return;
-    navigate(`/article/${cardEl.dataset.openArticle}`);
+    navigate(`/article/${encodeURIComponent(cardEl.dataset.openArticle)}`);
   });
 
   on(root, '[data-toggle-save]', 'click', async (event, btn) => {

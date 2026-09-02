@@ -8,5 +8,5 @@ export const CATEGORIES = [
 ];
 
 export function getCategoryLabel(id) {
-  return CATEGORIES.find((c) => c.id === id)?.label ?? id;
+  return CATEGORIES.find((c) => c.id === id)?.label ?? null;
 }

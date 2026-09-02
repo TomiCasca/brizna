@@ -8,6 +8,18 @@ export function escapeHtml(str) {
   })[char]);
 }
 
+// Los RSS suelen traer el resumen con HTML adentro (<p>, <img>, entidades...).
+// Lo pasamos por el parser del navegador para quedarnos solo con el texto.
+export function stripHtml(html) {
+  const doc = new DOMParser().parseFromString(html ?? '', 'text/html');
+  return (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
+}
+
+export function truncate(text, maxLength = 220) {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}…`;
+}
+
 export function render(container, html) {
   container.innerHTML = html;
 }

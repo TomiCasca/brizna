@@ -1,20 +1,58 @@
-// Orquesta el refresco diario de contenido. Hoy trae los artículos desde
-// mockData.js; el próximo paso es reemplazar fetchFromSources() por las
-// llamadas reales a RSS (rss2json) + GNews + arXiv, manteniendo el resto
-// de este archivo igual.
-import { getMockArticles } from './mockData.js';
+// Orquesta el refresco diario de contenido: trae RSS + arXiv de
+// config/sources.js a través de rssProxy.js, una categoría por vez.
+import { RSS_SOURCES, buildArxivUrl } from '../config/sources.js';
+import { CATEGORIES } from '../config/categories.js';
+import { fetchRssArticles } from './rssProxy.js';
 import {
   getLastFetchDate,
   setLastFetchDate,
   replaceArticlesCache,
   getCachedArticles,
-  getSavedArticles
+  getSavedArticles,
+  getRss2JsonApiKey
 } from './storageService.js';
 import { todayKey } from '../utils/dateUtils.js';
+import { sequentialMap } from '../utils/concurrency.js';
+
+function buildFetchTasks(apiKey) {
+  const tasks = [];
+
+  for (const category of CATEGORIES) {
+    for (const source of RSS_SOURCES[category.id] ?? []) {
+      tasks.push(() =>
+        fetchRssArticles({
+          url: source.url,
+          sourceName: source.name,
+          category: category.id,
+          language: source.language,
+          type: 'news',
+          apiKey
+        })
+      );
+    }
+
+    const arxivUrl = category.includesPapers ? buildArxivUrl(category.id) : null;
+    if (arxivUrl) {
+      tasks.push(() =>
+        fetchRssArticles({
+          url: arxivUrl,
+          sourceName: 'arXiv',
+          category: category.id,
+          language: 'en',
+          type: 'paper',
+          apiKey
+        })
+      );
+    }
+  }
+
+  return tasks;
+}
 
 async function fetchFromSources() {
-  // TODO: reemplazar por RSS/GNews/arXiv reales.
-  return getMockArticles();
+  const tasks = buildFetchTasks(getRss2JsonApiKey());
+  const results = await sequentialMap(tasks, (task) => task());
+  return results.flat();
 }
 
 export async function getDailyArticles({ force = false } = {}) {
@@ -42,11 +80,7 @@ export async function findArticleById(id) {
   const fromCache = cached.find((a) => a.id === id);
   if (fromCache) return fromCache;
 
-  const saved = await getSavedArticles();
-  const fromSaved = saved.find((a) => a.id === id);
-  if (fromSaved) return fromSaved;
-
-  return getMockArticles().find((a) => a.id === id) ?? null;
+  return (await getSavedArticles()).find((a) => a.id === id) ?? null;
 }
 
 export function groupByCategory(articles, categoryIds) {
