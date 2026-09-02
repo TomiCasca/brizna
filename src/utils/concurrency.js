@@ -5,7 +5,7 @@ export function delay(ms) {
 // El proxy RSS gratuito (rss2json, sin API key) corta si le llegan muchos
 // pedidos en simultáneo. Como esto solo corre una vez por día, conviene
 // hacerlo secuencial con una pausa chica antes que arriesgar un 429.
-export async function sequentialMap(items, worker, { delayMs = 300 } = {}) {
+export async function sequentialMap(items, worker, { delayMs = 600 } = {}) {
   const results = [];
   for (const item of items) {
     results.push(await worker(item));

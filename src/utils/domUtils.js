@@ -15,6 +15,22 @@ export function stripHtml(html) {
   return (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
 }
 
+// Algunos feeds (La Nación entre otros) devuelven link/enclosure con
+// entidades HTML sin decodificar (ej. "&amp;" en vez de "&"), porque así
+// venían en el XML. Sin esto, esos "&amp;" quedan pegados a la URL y
+// además se vuelven a escapar al armar el HTML de la tarjeta, rompiéndola.
+export function decodeHtmlEntities(str) {
+  if (!str) return str;
+  return new DOMParser().parseFromString(str, 'text/html').documentElement.textContent ?? str;
+}
+
+// Varios RSS (The Verge, Xataka...) no declaran imagen en un campo aparte:
+// la primera <img> del contenido/descripción ES la imagen de portada.
+export function extractFirstImage(html) {
+  const doc = new DOMParser().parseFromString(html ?? '', 'text/html');
+  return doc.querySelector('img')?.getAttribute('src') ?? null;
+}
+
 export function truncate(text, maxLength = 220) {
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength).trimEnd()}…`;

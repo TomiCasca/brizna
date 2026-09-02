@@ -1,5 +1,5 @@
 import { normalizeArticle } from '../models/Article.js';
-import { stripHtml, truncate } from '../utils/domUtils.js';
+import { stripHtml, truncate, extractFirstImage, decodeHtmlEntities } from '../utils/domUtils.js';
 import { delay } from '../utils/concurrency.js';
 
 const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json';
@@ -42,18 +42,27 @@ export async function fetchRssArticles({ url, sourceName, category, language, ty
 
   return items
     .filter((item) => item.link)
-    .map((item) =>
-      normalizeArticle({
-        id: item.link,
+    .map((item) => {
+      const link = decodeHtmlEntities(item.link);
+      const imageUrl = decodeHtmlEntities(
+        item.thumbnail ||
+          item.enclosure?.link ||
+          extractFirstImage(item.content) ||
+          extractFirstImage(item.description) ||
+          null
+      );
+
+      return normalizeArticle({
+        id: link,
         type,
         title: stripHtml(item.title),
         summary: truncate(stripHtml(item.description || item.content || '')),
-        imageUrl: item.thumbnail || item.enclosure?.link || null,
+        imageUrl,
         sourceName,
-        sourceUrl: item.link,
+        sourceUrl: link,
         category,
         language,
         publishedAt: parsePubDate(item.pubDate)
-      })
-    );
+      });
+    });
 }
