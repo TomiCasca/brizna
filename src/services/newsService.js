@@ -49,10 +49,27 @@ function buildFetchTasks(apiKey) {
   return tasks;
 }
 
+const MAX_ARTICLES_PER_CATEGORY = 10;
+
+// Cada categoría puede tener distinta cantidad de fuentes (Tecnología/Ciencia
+// tienen 3 + arXiv, Economía/Deportes solo 1), así que sin este tope las
+// categorías con más fuentes terminan con muchos más artículos que el resto.
+function capPerCategory(articles) {
+  const byCategory = new Map();
+  for (const article of articles) {
+    if (!byCategory.has(article.category)) byCategory.set(article.category, []);
+    byCategory.get(article.category).push(article);
+  }
+
+  return [...byCategory.values()].flatMap((group) =>
+    group.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)).slice(0, MAX_ARTICLES_PER_CATEGORY)
+  );
+}
+
 async function fetchFromSources() {
   const tasks = buildFetchTasks(getRss2JsonApiKey());
   const results = await sequentialMap(tasks, (task) => task());
-  return results.flat();
+  return capPerCategory(results.flat());
 }
 
 export async function getDailyArticles({ force = false } = {}) {

@@ -5,13 +5,13 @@
 
 export const RSS_SOURCES = {
   tech: [
-    { name: 'TechCrunch', url: 'https://techcrunch.com/feed/', language: 'en' },
+    { name: 'Ars Technica', url: 'https://arstechnica.com/feed/', language: 'en' },
     { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', language: 'en' },
     { name: 'Xataka', url: 'https://www.xataka.com/feedburner.xml', language: 'es' }
   ],
   science: [
-    { name: 'ScienceDaily', url: 'https://www.sciencedaily.com/rss/all.xml', language: 'en' },
-    { name: 'Nature', url: 'http://feeds.nature.com/nature/rss/current', language: 'en' },
+    { name: 'Space.com', url: 'https://www.space.com/feeds/all', language: 'en' },
+    { name: 'New Scientist', url: 'https://www.newscientist.com/feed/home/', language: 'en' },
     { name: 'La Nación', url: 'https://www.lanacion.com.ar/arc/outboundfeeds/rss/category/ciencia/', language: 'es' }
   ],
   economy: [{ name: 'Ámbito', url: 'https://www.ambito.com/rss/pages/home.xml', language: 'es' }],
