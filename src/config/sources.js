@@ -12,7 +12,7 @@ export const RSS_SOURCES = {
   science: [
     { name: 'ScienceDaily', url: 'https://www.sciencedaily.com/rss/all.xml', language: 'en' },
     { name: 'Nature', url: 'http://feeds.nature.com/nature/rss/current', language: 'en' },
-    { name: 'Muy Interesante', url: 'https://www.muyinteresante.com/feed/', language: 'es' }
+    { name: 'La Nación', url: 'https://www.lanacion.com.ar/arc/outboundfeeds/rss/category/ciencia/', language: 'es' }
   ],
   economy: [{ name: 'Ámbito', url: 'https://www.ambito.com/rss/pages/home.xml', language: 'es' }],
   sports: [{ name: 'Olé', url: 'https://www.ole.com.ar/rss/ultimas-noticias/', language: 'es' }],
