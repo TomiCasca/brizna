@@ -14,10 +14,15 @@ const FILTERS = [
 export async function renderSearch(root, { navigate }) {
   let query = '';
   let activeFilter = 'all';
-  let results = [];
+  let allResults = []; // último resultado crudo de searchArticles (todos los tipos)
+  let lastSearchedQuery = null; // para no repetir el pedido a GNews si solo cambia el filtro
   let gnewsError = null;
   const savedIds = new Set((await getSavedArticles()).map((a) => a.id));
   let debounceTimer = null;
+
+  function visibleResults() {
+    return activeFilter === 'all' ? allResults : allResults.filter((a) => a.type === activeFilter);
+  }
 
   function errorBannerHtml() {
     if (!gnewsError) return '';
@@ -28,6 +33,7 @@ export async function renderSearch(root, { navigate }) {
     if (!query.trim()) {
       return `<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Buscá por palabra clave, más allá de tus temas elegidos.</div>`;
     }
+    const results = visibleResults();
     if (results.length === 0) {
       return `${errorBannerHtml()}<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Sin resultados para "${escapeHtml(query)}".</div>`;
     }
@@ -76,8 +82,11 @@ export async function renderSearch(root, { navigate }) {
   paint();
 
   async function runSearch() {
-    const outcome = await searchArticles(query, { type: activeFilter });
-    results = outcome.results;
+    const q = query.trim();
+    if (!q || q === lastSearchedQuery) return;
+    lastSearchedQuery = q;
+    const outcome = await searchArticles(q);
+    allResults = outcome.results;
     gnewsError = outcome.gnewsError;
     paint({ keepFocus: true });
   }
@@ -85,19 +94,19 @@ export async function renderSearch(root, { navigate }) {
   on(root, '#search-input', 'input', (event, input) => {
     query = input.value;
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(runSearch, 250);
+    debounceTimer = setTimeout(runSearch, 400);
   });
 
   on(root, '#clear-search', 'click', () => {
     query = '';
-    results = [];
+    allResults = [];
+    lastSearchedQuery = null;
     paint();
   });
 
   on(root, '[data-filter]', 'click', (event, btn) => {
     activeFilter = btn.dataset.filter;
-    if (query.trim()) runSearch();
-    else paint();
+    paint();
   });
 
   on(root, '[data-open-article]', 'click', (event, cardEl) => {
@@ -107,7 +116,7 @@ export async function renderSearch(root, { navigate }) {
 
   on(root, '[data-toggle-save]', 'click', async (event, btn) => {
     const id = btn.dataset.toggleSave;
-    const article = results.find((a) => a.id === id);
+    const article = allResults.find((a) => a.id === id);
     if (!article) return;
     if (savedIds.has(id)) {
       savedIds.delete(id);

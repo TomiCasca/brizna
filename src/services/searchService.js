@@ -19,7 +19,11 @@ function dedupeById(articles) {
   return [...seen.values()];
 }
 
-export async function searchArticles(query, { type = 'all' } = {}) {
+// Devuelve TODOS los tipos (no filtra por news/paper acá) — el filtro de
+// tipo se aplica en la vista sobre este mismo resultado, para no pegarle
+// de nuevo a GNews cada vez que el usuario solo cambia de chip (Todos/
+// Noticias/Papers) sin cambiar el texto buscado.
+export async function searchArticles(query) {
   const q = query.trim();
   if (!q) return { results: [], gnewsError: null };
 
@@ -34,11 +38,9 @@ export async function searchArticles(query, { type = 'all' } = {}) {
   const gnewsError = gnewsSettled.ok ? null : gnewsSettled.e.message;
 
   const fromCache = cached.filter((article) => matchesQuery(article, q));
-  const combined = dedupeById([...fromCache, ...gnewsResults]);
+  const combined = dedupeById([...fromCache, ...gnewsResults]).sort(
+    (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
+  );
 
-  const results = combined
-    .filter((article) => type === 'all' || article.type === type)
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
-  return { results, gnewsError };
+  return { results: combined, gnewsError };
 }
