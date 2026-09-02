@@ -32,7 +32,7 @@ export async function renderArticleDetail(root, { navigate, params }) {
       </div>
 
       <div class="article-hero" style="position:relative;overflow:hidden;margin:8px 20px 0;height:190px;border-radius:16px;background:var(--thumb);display:flex;align-items:center;justify-content:center;color:var(--thumb-ink);">
-        ${icons.image}
+        ${article.type === 'paper' ? icons.paper : icons.image}
         ${
           article.imageUrl
             ? `<img src="${escapeHtml(article.imageUrl)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()" />`

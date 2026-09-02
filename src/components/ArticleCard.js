@@ -6,7 +6,7 @@ export function ArticleCard(article, { saved = false } = {}) {
   return `
     <div class="article-card" role="button" data-open-article="${escapeHtml(article.id)}">
       <div class="article-thumb">
-        ${icons.image}
+        ${article.type === 'paper' ? icons.paper : icons.image}
         ${article.imageUrl ? `<img src="${escapeHtml(article.imageUrl)}" alt="" loading="lazy" onerror="this.remove()" />` : ''}
       </div>
       <div class="article-body">

@@ -23,5 +23,7 @@ export const icons = {
 
   image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.4"/><path d="m21 15-5-5-4 4-3-3-5 5"/></svg>`,
 
+  paper: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="8.5" rx="1.2"/><path d="M5 10.5h14M12 10.5v8.5"/><path d="M12 3 3 7l9 4 9-4-9-4Z"/><path d="M6.5 8.2v2.3c0 .9 2.5 1.7 5.5 1.7s5.5-.8 5.5-1.7V8.2"/></svg>`,
+
   close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>`
 };
