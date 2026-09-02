@@ -1,0 +1,25 @@
+:root {
+  --bg: #faf9f7;
+  --card: #ffffff;
+  --text: #18181b;
+  --text-body: #3f3f46;
+  --sub: #71717a;
+  --border: #e7e5e4;
+  --accent: #2563eb;
+  --accent-tint: rgba(37, 99, 235, 0.1);
+  --thumb: #eef2f7;
+  --thumb-ink: #9aa7b8;
+}
+
+:root[data-theme='dark'] {
+  --bg: #111113;
+  --card: #1c1c1f;
+  --text: #f4f4f5;
+  --text-body: #d4d4d8;
+  --sub: #a1a1aa;
+  --border: #2a2a2e;
+  --accent: #3b82f6;
+  --accent-tint: rgba(59, 130, 246, 0.15);
+  --thumb: #252529;
+  --thumb-ink: #6b7280;
+}
