@@ -15,11 +15,12 @@ async function fetchFeedItems(feedUrl, apiKey) {
   if (apiKey) params.set('api_key', apiKey);
   const proxied = `${RSS2JSON_ENDPOINT}?${params.toString()}`;
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const maxAttempts = 3;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const response = await fetch(proxied);
-      if (response.status === 429 && attempt === 0) {
-        await delay(2000);
+      if (response.status === 429 && attempt < maxAttempts - 1) {
+        await delay(2500 * (attempt + 1));
         continue;
       }
       const data = await response.json();

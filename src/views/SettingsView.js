@@ -9,6 +9,7 @@ import {
   getRss2JsonApiKey,
   setRss2JsonApiKey
 } from '../services/storageService.js';
+import { getDailyArticles } from '../services/newsService.js';
 import { BottomTabBar } from '../components/BottomTabBar.js';
 import { icons } from '../components/icons.js';
 import { escapeHtml, on } from '../utils/domUtils.js';
@@ -18,6 +19,8 @@ export async function renderSettings(root, { navigate }) {
   let theme = getTheme();
   let gnewsKey = getGNewsApiKey();
   let rss2jsonKey = getRss2JsonApiKey();
+  let refreshing = false;
+  let refreshError = false;
 
   function template() {
     return `
@@ -81,6 +84,22 @@ export async function renderSettings(root, { navigate }) {
           </div>
         </div>
 
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Contenido</div>
+          <div style="font-size:12.5px;color:var(--sub);margin-bottom:14px;line-height:1.5;">
+            Brizna busca novedades una vez por día. Si acabás de cambiar algo (temas, API keys)
+            y querés verlo reflejado ya, usá este botón en vez de esperar al día siguiente.
+          </div>
+          <button id="refresh-btn" class="btn-primary" style="background:${refreshing ? 'var(--sub)' : 'var(--accent)'};" ${refreshing ? 'disabled' : ''}>
+            ${refreshing ? 'Actualizando…' : 'Actualizar contenido ahora'}
+          </button>
+          ${
+            refreshError
+              ? '<div style="font-size:12px;color:#dc2626;margin-top:8px;text-align:center;">No se pudo actualizar. Revisá tu conexión e intentá de nuevo.</div>'
+              : ''
+          }
+        </div>
+
         <div style="text-align:center;font-size:11.5px;color:var(--sub);">Brizna · v0.1 · datos guardados solo en este dispositivo</div>
       </div>
       ${BottomTabBar('settings')}
@@ -116,6 +135,20 @@ export async function renderSettings(root, { navigate }) {
   on(root, '#rss2json-key-input', 'change', (event, input) => {
     rss2jsonKey = input.value.trim();
     setRss2JsonApiKey(rss2jsonKey);
+  });
+
+  on(root, '#refresh-btn', 'click', async () => {
+    refreshing = true;
+    refreshError = false;
+    paint();
+    try {
+      await getDailyArticles({ force: true });
+      navigate('/home');
+    } catch {
+      refreshing = false;
+      refreshError = true;
+      paint();
+    }
   });
 
   on(root, '[data-navigate]', 'click', (event, btn) => navigate(`/${btn.dataset.navigate}`));
