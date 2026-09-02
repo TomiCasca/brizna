@@ -21,17 +21,24 @@ function dedupeById(articles) {
 
 export async function searchArticles(query, { type = 'all' } = {}) {
   const q = query.trim();
-  if (!q) return [];
+  if (!q) return { results: [], gnewsError: null };
 
-  const [cached, gnewsResults] = await Promise.all([
+  const gnewsKey = getGNewsApiKey();
+
+  const [cached, gnewsSettled] = await Promise.all([
     getCachedArticles(),
-    searchGNews(q, getGNewsApiKey())
+    gnewsKey ? searchGNews(q, gnewsKey).then((r) => ({ ok: true, r })).catch((e) => ({ ok: false, e })) : { ok: true, r: [] }
   ]);
+
+  const gnewsResults = gnewsSettled.ok ? gnewsSettled.r : [];
+  const gnewsError = gnewsSettled.ok ? null : gnewsSettled.e.message;
 
   const fromCache = cached.filter((article) => matchesQuery(article, q));
   const combined = dedupeById([...fromCache, ...gnewsResults]);
 
-  return combined
+  const results = combined
     .filter((article) => type === 'all' || article.type === type)
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+  return { results, gnewsError };
 }

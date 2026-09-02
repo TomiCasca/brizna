@@ -5,30 +5,33 @@ import { normalizeArticle } from '../models/Article.js';
 
 const GNEWS_ENDPOINT = 'https://gnews.io/api/v4/search';
 
+// A diferencia de rssProxy (que traga errores por fuente porque son 10
+// fuentes y una caída no debe tirar abajo el resto), acá hay una sola
+// llamada y el usuario la puede diagnosticar — así que el error real de
+// GNews se propaga en vez de esconderse como un array vacío silencioso.
 export async function searchGNews(query, apiKey, { lang = 'es', max = 10 } = {}) {
   if (!apiKey) return [];
 
-  try {
-    const url = `${GNEWS_ENDPOINT}?q=${encodeURIComponent(query)}&lang=${lang}&max=${max}&apikey=${apiKey}`;
-    const response = await fetch(url);
-    if (!response.ok) return [];
-    const data = await response.json();
+  const url = `${GNEWS_ENDPOINT}?q=${encodeURIComponent(query)}&lang=${lang}&max=${max}&apikey=${apiKey}`;
+  const response = await fetch(url);
+  const data = await response.json();
 
-    return (data.articles ?? []).map((item) =>
-      normalizeArticle({
-        id: item.url,
-        type: 'news',
-        title: item.title,
-        summary: item.description ?? '',
-        imageUrl: item.image ?? null,
-        sourceName: item.source?.name ?? 'GNews',
-        sourceUrl: item.url,
-        category: null,
-        language: lang,
-        publishedAt: item.publishedAt
-      })
-    );
-  } catch {
-    return [];
+  if (!response.ok) {
+    throw new Error(data.errors?.[0] ?? `GNews respondió ${response.status}`);
   }
+
+  return (data.articles ?? []).map((item) =>
+    normalizeArticle({
+      id: item.url,
+      type: 'news',
+      title: item.title,
+      summary: item.description ?? '',
+      imageUrl: item.image ?? null,
+      sourceName: item.source?.name ?? 'GNews',
+      sourceUrl: item.url,
+      category: null,
+      language: lang,
+      publishedAt: item.publishedAt
+    })
+  );
 }

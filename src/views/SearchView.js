@@ -15,17 +15,24 @@ export async function renderSearch(root, { navigate }) {
   let query = '';
   let activeFilter = 'all';
   let results = [];
+  let gnewsError = null;
   const savedIds = new Set((await getSavedArticles()).map((a) => a.id));
   let debounceTimer = null;
+
+  function errorBannerHtml() {
+    if (!gnewsError) return '';
+    return `<div style="padding:12px 14px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:12.5px;margin-bottom:12px;">GNews no respondió: ${escapeHtml(gnewsError)}</div>`;
+  }
 
   function resultsHtml() {
     if (!query.trim()) {
       return `<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Buscá por palabra clave, más allá de tus temas elegidos.</div>`;
     }
     if (results.length === 0) {
-      return `<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Sin resultados para "${escapeHtml(query)}".</div>`;
+      return `${errorBannerHtml()}<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Sin resultados para "${escapeHtml(query)}".</div>`;
     }
     return `
+      ${errorBannerHtml()}
       <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">${results.length} resultado${results.length === 1 ? '' : 's'}</div>
       <div class="card-list">
         ${results.map((a) => ArticleCard(a, { saved: savedIds.has(a.id) })).join('')}
@@ -69,7 +76,9 @@ export async function renderSearch(root, { navigate }) {
   paint();
 
   async function runSearch() {
-    results = await searchArticles(query, { type: activeFilter });
+    const outcome = await searchArticles(query, { type: activeFilter });
+    results = outcome.results;
+    gnewsError = outcome.gnewsError;
     paint({ keepFocus: true });
   }
 
