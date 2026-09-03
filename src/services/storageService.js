@@ -7,7 +7,6 @@ const LS_KEYS = {
   interests: 'user_interests',
   theme: 'theme_preference',
   lastFetchDate: 'last_fetch_date',
-  gnewsApiKey: 'gnews_api_key',
   rss2jsonApiKey: 'rss2json_api_key'
 };
 
@@ -76,15 +75,6 @@ export function getLastFetchDate() {
 
 export function setLastFetchDate(isoDate) {
   localStorage.setItem(LS_KEYS.lastFetchDate, isoDate);
-}
-
-export function getGNewsApiKey() {
-  return localStorage.getItem(LS_KEYS.gnewsApiKey) ?? '';
-}
-
-export function setGNewsApiKey(key) {
-  if (key) localStorage.setItem(LS_KEYS.gnewsApiKey, key);
-  else localStorage.removeItem(LS_KEYS.gnewsApiKey);
 }
 
 export function getRss2JsonApiKey() {

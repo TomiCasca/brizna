@@ -15,8 +15,8 @@ export async function renderSearch(root, { navigate }) {
   let query = '';
   let activeFilter = 'all';
   let allResults = []; // último resultado crudo de searchArticles (todos los tipos)
-  let lastSearchedQuery = null; // para no repetir el pedido a GNews si solo cambia el filtro
-  let gnewsError = null;
+  let lastSearchedQuery = null; // para no repetir la búsqueda en vivo si solo cambia el filtro
+  let searchError = null;
   const savedIds = new Set((await getSavedArticles()).map((a) => a.id));
   let debounceTimer = null;
 
@@ -25,8 +25,8 @@ export async function renderSearch(root, { navigate }) {
   }
 
   function errorBannerHtml() {
-    if (!gnewsError) return '';
-    return `<div style="padding:12px 14px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:12.5px;margin-bottom:12px;">GNews no respondió: ${escapeHtml(gnewsError)}</div>`;
+    if (!searchError) return '';
+    return `<div style="padding:12px 14px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:12.5px;margin-bottom:12px;">La búsqueda en vivo falló: ${escapeHtml(searchError)}</div>`;
   }
 
   function resultsHtml() {
@@ -87,7 +87,7 @@ export async function renderSearch(root, { navigate }) {
     lastSearchedQuery = q;
     const outcome = await searchArticles(q);
     allResults = outcome.results;
-    gnewsError = outcome.gnewsError;
+    searchError = outcome.searchError;
     paint({ keepFocus: true });
   }
 
