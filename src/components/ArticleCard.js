@@ -11,7 +11,7 @@ export function ArticleCard(article, { saved = false } = {}) {
       </div>
       <div class="article-body">
         <div class="article-title clamp-2">${escapeHtml(article.title)}</div>
-        <div class="article-summary clamp-2">${escapeHtml(article.summary)}</div>
+        ${article.summary ? `<div class="article-summary clamp-2">${escapeHtml(article.summary)}</div>` : ''}
         <div class="article-meta">
           <span class="article-meta-text">${escapeHtml(article.sourceName)} · ${formatRelativeDate(article.publishedAt)}</span>
           <button

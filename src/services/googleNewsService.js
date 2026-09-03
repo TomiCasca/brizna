@@ -20,6 +20,10 @@ export async function searchGoogleNews(query, { apiKey, lang = 'es-419', country
 
   return rawArticles.map((article) => {
     const { title, sourceName } = splitTitleAndSource(article.title);
-    return { ...article, title, sourceName };
+    // El campo "description" de Google Noticias no es un resumen real: es
+    // el mismo título repetido (o, para notas agrupadas, una lista de
+    // títulos relacionados). Mostrarlo duplica el título, así que se
+    // descarta en vez de mostrar texto confuso.
+    return { ...article, title, sourceName, summary: '' };
   });
 }

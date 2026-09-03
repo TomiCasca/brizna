@@ -13,6 +13,7 @@ import {
 } from './storageService.js';
 import { todayKey } from '../utils/dateUtils.js';
 import { sequentialMap } from '../utils/concurrency.js';
+import { findInLastSearch } from './searchService.js';
 
 function buildFetchTasks(apiKey) {
   const tasks = [];
@@ -97,7 +98,10 @@ export async function findArticleById(id) {
   const fromCache = cached.find((a) => a.id === id);
   if (fromCache) return fromCache;
 
-  return (await getSavedArticles()).find((a) => a.id === id) ?? null;
+  const fromSaved = (await getSavedArticles()).find((a) => a.id === id);
+  if (fromSaved) return fromSaved;
+
+  return findInLastSearch(id);
 }
 
 export function groupByCategory(articles, categoryIds) {

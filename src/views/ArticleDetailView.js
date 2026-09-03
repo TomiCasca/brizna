@@ -50,7 +50,11 @@ export async function renderArticleDetail(root, { navigate, params }) {
         }
         <div style="font-size:21px;font-weight:700;line-height:1.3;letter-spacing:-0.01em;">${escapeHtml(article.title)}</div>
         <div style="font-size:12.5px;color:var(--sub);">${escapeHtml(article.sourceName)} · ${formatRelativeDate(article.publishedAt)}</div>
-        <div style="font-size:14.5px;line-height:1.65;color:var(--text-body);">${escapeHtml(article.summary)}</div>
+        ${
+          article.summary
+            ? `<div style="font-size:14.5px;line-height:1.65;color:var(--text-body);">${escapeHtml(article.summary)}</div>`
+            : `<div style="font-size:14.5px;line-height:1.65;color:var(--sub);font-style:italic;">Esta fuente no ofrece un resumen — tocá "Leer nota completa" para ver el artículo entero.</div>`
+        }
 
         <a class="btn-primary" href="${escapeHtml(article.sourceUrl)}" target="_blank" rel="noopener noreferrer" style="margin-top:6px;">
           <span>Leer nota completa</span>

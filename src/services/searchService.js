@@ -19,6 +19,18 @@ function dedupeById(articles) {
   return [...seen.values()];
 }
 
+// Los resultados de Google Noticias no viven en articles_cache (son "en
+// vivo", no se guardan a diario), así que sin esto, tocar una tarjeta de
+// búsqueda y entrar al detalle no encontraba el artículo. Se guarda en
+// memoria nomás — alcanza para el uso normal (buscar y tocar un resultado
+// en la misma sesión); se pierde al recargar la página, que es un caso
+// raro y cae bien en el mensaje de "no encontramos ese artículo".
+let lastSearchResults = [];
+
+export function findInLastSearch(id) {
+  return lastSearchResults.find((a) => a.id === id) ?? null;
+}
+
 // Devuelve TODOS los tipos (no filtra por news/paper acá) — el filtro de
 // tipo se aplica en la vista sobre este mismo resultado, para no repetir
 // la búsqueda en vivo cada vez que el usuario solo cambia de chip (Todos/
@@ -42,5 +54,6 @@ export async function searchArticles(query) {
     (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
   );
 
+  lastSearchResults = combined;
   return { results: combined, searchError };
 }

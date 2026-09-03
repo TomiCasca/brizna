@@ -17,8 +17,8 @@ export async function renderSearch(root, { navigate }) {
   let allResults = []; // último resultado crudo de searchArticles (todos los tipos)
   let lastSearchedQuery = null; // para no repetir la búsqueda en vivo si solo cambia el filtro
   let searchError = null;
+  let searching = false;
   const savedIds = new Set((await getSavedArticles()).map((a) => a.id));
-  let debounceTimer = null;
 
   function visibleResults() {
     return activeFilter === 'all' ? allResults : allResults.filter((a) => a.type === activeFilter);
@@ -30,12 +30,15 @@ export async function renderSearch(root, { navigate }) {
   }
 
   function resultsHtml() {
-    if (!query.trim()) {
-      return `<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Buscá por palabra clave, más allá de tus temas elegidos.</div>`;
+    if (searching) {
+      return `<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Buscando…</div>`;
+    }
+    if (!lastSearchedQuery) {
+      return `<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Escribí un tema y tocá "Buscar" en el teclado, más allá de tus temas elegidos.</div>`;
     }
     const results = visibleResults();
     if (results.length === 0) {
-      return `${errorBannerHtml()}<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Sin resultados para "${escapeHtml(query)}".</div>`;
+      return `${errorBannerHtml()}<div style="text-align:center;color:var(--sub);font-size:13.5px;padding:40px 0;">Sin resultados para "${escapeHtml(lastSearchedQuery)}".</div>`;
     }
     return `
       ${errorBannerHtml()}
@@ -50,15 +53,24 @@ export async function renderSearch(root, { navigate }) {
     return `
       <div class="page-header" style="padding-bottom:14px;">
         <div class="brand-title" style="margin-bottom:14px;">Buscar</div>
-        <div class="search-bar">
-          ${icons.search}
-          <input id="search-input" type="text" placeholder="Inteligencia artificial, economía, tu equipo..." value="${escapeHtml(query)}" />
-          ${
-            query
-              ? `<button id="clear-search" aria-label="Limpiar búsqueda" style="width:20px;height:20px;border-radius:999px;background:var(--sub);color:#fff;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&times;</button>`
-              : ''
-          }
-        </div>
+        <form id="search-form">
+          <div class="search-bar">
+            ${icons.search}
+            <input
+              id="search-input"
+              type="text"
+              enterkeyhint="search"
+              autocorrect="off"
+              placeholder="Inteligencia artificial, economía, tu equipo..."
+              value="${escapeHtml(query)}"
+            />
+            ${
+              query
+                ? `<button type="button" id="clear-search" aria-label="Limpiar búsqueda" style="width:20px;height:20px;border-radius:999px;background:var(--sub);color:#fff;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&times;</button>`
+                : ''
+            }
+          </div>
+        </form>
       </div>
       <div style="padding:0 22px 16px;display:flex;gap:8px;">
         ${FILTERS.map(
@@ -84,17 +96,26 @@ export async function renderSearch(root, { navigate }) {
   async function runSearch() {
     const q = query.trim();
     if (!q || q === lastSearchedQuery) return;
-    lastSearchedQuery = q;
+    searching = true;
+    paint({ keepFocus: true });
     const outcome = await searchArticles(q);
+    lastSearchedQuery = q;
     allResults = outcome.results;
     searchError = outcome.searchError;
+    searching = false;
     paint({ keepFocus: true });
   }
 
+  // El texto se actualiza en vivo mientras se escribe, pero la búsqueda
+  // recién se dispara al confirmar (Enter / "Buscar" del teclado) — así
+  // no le pegamos a Google Noticias en cada letra tipeada.
   on(root, '#search-input', 'input', (event, input) => {
     query = input.value;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(runSearch, 400);
+  });
+
+  on(root, '#search-form', 'submit', (event) => {
+    event.preventDefault();
+    runSearch();
   });
 
   on(root, '#clear-search', 'click', () => {
